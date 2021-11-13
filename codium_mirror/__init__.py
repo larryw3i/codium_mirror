@@ -61,7 +61,7 @@ def get_os_release():
     if system == 'linux':
         os_release = subprocess.check_output('cat /etc/os-release', shell=True)
         os_release = re.findall(r'ID_LIKE=(\S*)\n', os_release.decode())[0]
-        return os_release in ['debian'] and 'deb' or ''
+        return os_release.lower() in ['debian','ubuntu'] and 'deb' or ''
     return ''
 
 
