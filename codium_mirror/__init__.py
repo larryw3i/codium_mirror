@@ -21,6 +21,7 @@ mirror = _mirror[0] if len(_mirror) > 0 else 'TUNA'
 
 system = platform.system().lower()
 
+
 def get_architecture():
 
     # default
@@ -29,6 +30,7 @@ def get_architecture():
             .decode().strip()
         return architecture in ['x86_64'] and 'amd64' or ''
     return ''
+
 
 def get_mirror_url():
     mirrors = open(mirrors_path).read().split('\n')
@@ -53,6 +55,7 @@ def get_pkgs():
         return links
     return []
 
+
 def get_os_release():
 
     if system == 'linux':
@@ -61,13 +64,14 @@ def get_os_release():
         return os_release in ['debian'] and 'deb' or ''
     return ''
 
+
 def get_installation_sh(os_release, pkg):
 
     # default
     if os_release in ['deb']:
         return \
             f'curl {mirror_url+pkg} --output {pkg}; ' +\
-            f'echo "sudo dpkg --install {pkg}";'+\
+            f'echo "sudo dpkg --install {pkg}";' +\
             f'sudo dpkg --install {pkg};' +\
             f'rm -rf {pkg}'
 
@@ -78,7 +82,7 @@ def run():
     pkgs = get_pkgs()
     os_release = get_os_release()
 
-    if len(architecture) + len(pkgs)  +len(os_release) < 3:
+    if len(architecture) + len(pkgs) + len(os_release) < 3:
         print('codium-mirror exit.')
 
     for p in pkgs:
@@ -87,11 +91,11 @@ def run():
 
 
 print('\n',
-    'system','\n\t',system,'\n',
-    'base_path', '\n\t', base_path, '\n',
-    'bash_path', '\n\t', bash_path, '\n',
-    'sys_argv', '\n\t', sys_argv, '\n',
-    'get_architecture', '\n\t', get_architecture(), '\n',
-    'get_mirror', '\n\t', get_mirror_url(), '\n',
-    'mirror', '\n\t', mirror, '\n',
-    'get_os_release', '\n\t', get_os_release(), '\n')
+      'system', '\n\t', system, '\n',
+      'base_path', '\n\t', base_path, '\n',
+      'bash_path', '\n\t', bash_path, '\n',
+      'sys_argv', '\n\t', sys_argv, '\n',
+      'get_architecture', '\n\t', get_architecture(), '\n',
+      'get_mirror', '\n\t', get_mirror_url(), '\n',
+      'mirror', '\n\t', mirror, '\n',
+      'get_os_release', '\n\t', get_os_release(), '\n')
