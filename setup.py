@@ -1,6 +1,8 @@
-import setuptools
 import re
-from codium_mirror import __version__, __appauthor__
+
+import setuptools
+
+from codium_mirror import __appauthor__, __version__
 
 long_description = open("README.md", "r", encoding="utf-8").read()
 
@@ -26,5 +28,5 @@ setuptools.setup(
     },
     python_requires='>=3.6',
     install_requires=[],
-    include_package_data = True,
+    include_package_data=True,
 )
