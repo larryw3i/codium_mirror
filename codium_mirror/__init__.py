@@ -5,7 +5,7 @@ import re
 import subprocess
 import sys
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __appauthor__ = 'larryw3i & Contributors'
 
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -93,7 +93,7 @@ def run():
         print('codium-mirror exit.')
 
     for p in pkgs:
-        if os_release in p and architecture in p and p.endswith('.deb'):
+        if os_release in p and architecture in p and p.endswith(os_release):
             os.system(get_installation_sh(os_release, p))
 
 
