@@ -5,7 +5,7 @@ import re
 import subprocess
 import sys
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __appauthor__ = 'larryw3i & Contributors'
 
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -61,16 +61,23 @@ def get_os_release():
     if system == 'linux':
         os_release = subprocess.check_output('cat /etc/os-release', shell=True)
         os_release = re.findall(r'ID_LIKE=(\S*)\n', os_release.decode())[0]
-        return os_release.lower() in ['debian','ubuntu'] and 'deb' or ''
+        return os_release.lower() in ['debian', 'ubuntu'] and 'deb' or ''
     return ''
 
 
+def get_pkg_ur(pkg):
+
+    # default
+    return mirror_url + pkg
+
+
 def get_installation_sh(os_release, pkg):
+    pkg_ur = get_pkg_ur(pkg)
 
     # default
     if os_release in ['deb']:
         return \
-            f'curl {mirror_url+pkg} --output {pkg}; ' +\
+            f'curl {pkg_ur} --output {pkg}; ' +\
             f'echo "sudo dpkg --install {pkg}";' +\
             f'sudo dpkg --install {pkg};' +\
             f'rm -rf {pkg}'
@@ -79,8 +86,8 @@ def get_installation_sh(os_release, pkg):
 def run():
 
     architecture = get_architecture()
-    pkgs = get_pkgs()
     os_release = get_os_release()
+    pkgs = get_pkgs()
 
     if len(architecture) + len(pkgs) + len(os_release) < 3:
         print('codium-mirror exit.')
@@ -98,4 +105,5 @@ print('\n',
       'get_architecture', '\n\t', get_architecture(), '\n',
       'get_mirror', '\n\t', get_mirror_url(), '\n',
       'mirror', '\n\t', mirror, '\n',
-      'get_os_release', '\n\t', get_os_release(), '\n')
+      'get_os_release', '\n\t', get_os_release(), '\n'
+      )
