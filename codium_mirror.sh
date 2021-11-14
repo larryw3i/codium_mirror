@@ -3,15 +3,17 @@
 _args=("$@") # All parameters from terminal.
 
 p8(){
-    isort setup.py
-    autopep8 -i -a -a -r -v setup.py
-    isort codium_mirror/__init__.py
-    autopep8 -i -a -a -r -v codium_mirror/__init__.py
+    isort ./setup.py
+    autopep8 -i -a -a -r -v ./setup.py
+    isort ./codium_mirror/__init__.py
+    autopep8 -i -a -a -r -v ./codium_mirror/__init__.py
+    isort ./codium_mirror.py
+    autopep8 -i -a -a -r -v ./codium_mirror/__init__.py
 }
 
 
 twine_upload(){
-    twine upload --verbose dist/*
+    twine upload  dist/*
 }
 
 bdist(){
@@ -23,7 +25,7 @@ _i_test(){
     bdist
     pip3 uninstall codium_mirror -y
     pip3 install dist/*.whl
-    codium_mirror
+    codium_mirror -d
 }
 
 tu(){       twine_upload;       }

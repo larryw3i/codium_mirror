@@ -5,36 +5,42 @@ import re
 import subprocess
 import sys
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __appauthor__ = 'larryw3i & Contributors'
 
+
+
 base_path = os.path.dirname(os.path.abspath(__file__))
-bash_path = os.path.join(base_path, 'codium_mirror.bash')
 mirrors_path = os.path.join(base_path, 'codium.mirrors')
 
-sys_argv = sys.argv[1:]
-sys_argv = ' '.join(sys_argv)
+sys_argv = ' '.join(sys.argv[1:])
 
 
-_mirror = re.findall(r'--mirror=(\S*)', sys_argv)
-mirror = _mirror[0] if len(_mirror) > 0 else 'TUNA'
+mirror = (re.findall(r'--mirror=(\S*)', sys_argv))[0] \
+    if ' --mirror=' in sys_argv else 'BFSU'
+
+debug = ' -d ' in sys_argv or sys_argv.endswith(' -d') or sys_argv == '-d'
 
 system = platform.system().lower()
 
 
-def get_architecture():
+_os_release = subprocess.check_output('cat /etc/os-release', shell=True)
+os_release = re.findall(r'ID_LIKE=(\S*)\n', _os_release.decode())[0]
 
-    # default
-    if system == 'linux':
-        architecture = subprocess.check_output('uname -m', shell=True)\
-            .decode().strip()
-        return architecture in ['x86_64'] and 'amd64' or ''
-    return ''
+is_debian = os_release.lower() in ['debian', 'ubuntu']
+
+try:
+    subprocess.check_output('which curl', shell=True)
+except:
+    print('curl is not installed.')
+    if is_debian:
+        print('install curl: sudo apt-get install curl')
+    exit()
 
 
 def get_mirror_url():
-    mirrors = open(mirrors_path).read().split('\n')
-    mirrors = [m for m in mirrors if len(m) > 0]
+    _mirrors = open(mirrors_path).read().split('\n')
+    mirrors = [m for m in _mirrors if len(m) > 0]
     for m in mirrors:
         m_splits = m.split(' ')
         if m_splits[0] == mirror:
@@ -45,23 +51,31 @@ def get_mirror_url():
 mirror_url = get_mirror_url()
 
 
+def get_architecture():
+
+    # default
+    if system == 'linux':
+        architecture = subprocess.check_output('uname -m', shell=True)\
+            .decode().strip()
+        return architecture in ['x86_64', 'amd64'] and 'amd64' or ''
+    return 'amd64'
+
+
 def get_pkgs():
 
     # default
     if system == 'linux':
         html = subprocess.check_output('curl ' + mirror_url, shell=True)
-        links = re.findall(r'href="(\S*)"', html.decode())
-        links = [l for l in links if '/' not in l]
+        _links = re.findall(r'href="(\S*)"', html.decode())
+        links = [l for l in _links if '/' not in l]
         return links
     return []
 
 
-def get_os_release():
+def get_pkg_ext():
 
     if system == 'linux':
-        os_release = subprocess.check_output('cat /etc/os-release', shell=True)
-        os_release = re.findall(r'ID_LIKE=(\S*)\n', os_release.decode())[0]
-        return os_release.lower() in ['debian', 'ubuntu'] and 'deb' or ''
+        return is_debian and 'deb' or ''
     return ''
 
 
@@ -71,14 +85,16 @@ def get_pkg_ur(pkg):
     return mirror_url + pkg
 
 
-def get_installation_sh(os_release, pkg):
+def get_installation_sh(pkg_ext, pkg):
+
     pkg_ur = get_pkg_ur(pkg)
+    print('pkg_ur', '\n\t', pkg_ur, '\n')
 
     # default
-    if os_release in ['deb']:
+    if pkg_ext in ['deb']:
         return \
             f'curl {pkg_ur} --output {pkg}; ' +\
-            f'echo "sudo dpkg --install {pkg}";' +\
+            f'printf "\nsudo dpkg --install {pkg}\n\n";' +\
             f'sudo dpkg --install {pkg};' +\
             f'rm -rf {pkg}'
 
@@ -86,24 +102,30 @@ def get_installation_sh(os_release, pkg):
 def run():
 
     architecture = get_architecture()
-    os_release = get_os_release()
+    pkg_ext = get_pkg_ext()
     pkgs = get_pkgs()
 
-    if len(architecture) + len(pkgs) + len(os_release) < 3:
+    if len(architecture) + len(pkgs) + len(pkg_ext) < 3:
         print('codium-mirror exit.')
+        exit()
+
+    print(
+        '\n',
+        'debug', '\n\t', debug, '\n',
+        'system', '\n\t', system, '\n',
+        'base_path', '\n\t', base_path, '\n',
+        'sys_argv', '\n\t', sys_argv, '\n',
+        'architecture', '\n\t', architecture, '\n',
+        'mirror_url', '\n\t', mirror_url, '\n',
+        'mirror', '\n\t', mirror, '\n',
+        'pkg_ext', '\n\t', pkg_ext, '\n'
+    )
 
     for p in pkgs:
-        if os_release in p and architecture in p and p.endswith(os_release):
-            os.system(get_installation_sh(os_release, p))
+        if architecture in p and p.endswith(pkg_ext):
+            installation_sh = get_installation_sh(pkg_ext, p)
 
-
-print('\n',
-      'system', '\n\t', system, '\n',
-      'base_path', '\n\t', base_path, '\n',
-      'bash_path', '\n\t', bash_path, '\n',
-      'sys_argv', '\n\t', sys_argv, '\n',
-      'get_architecture', '\n\t', get_architecture(), '\n',
-      'get_mirror', '\n\t', get_mirror_url(), '\n',
-      'mirror', '\n\t', mirror, '\n',
-      'get_os_release', '\n\t', get_os_release(), '\n'
-      )
+            if debug:
+                print(installation_sh)
+            else:
+                os.system(installation_sh)
