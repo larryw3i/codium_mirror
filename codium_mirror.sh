@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-_args=("$@") # All parameters from terminal.
+_args=("$@") # all parameters from terminal.
 
 p8(){
     isort ./setup.py
@@ -25,7 +25,7 @@ _i_test(){
     bdist
     pip3 uninstall codium_mirror -y
     pip3 install dist/*.whl
-    codium_mirror -d
+    codium-mirror -d
 }
 
 tu(){       twine_upload;       }

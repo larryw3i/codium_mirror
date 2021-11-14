@@ -23,7 +23,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'codium_mirror=codium_mirror:run',
+            'codium-mirror=codium_mirror:run',
         ]
     },
     python_requires='>=3.6',
